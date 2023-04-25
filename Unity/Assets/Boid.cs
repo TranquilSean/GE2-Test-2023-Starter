@@ -19,6 +19,12 @@ public class Boid : MonoBehaviour
     public float maxSpeed = 5.0f;
     public float maxForce = 10.0f;
 
+
+    //my vars
+    public bool playerSteeringEnabled = false; //bool to trigger if player in control of boid
+    public float steeringForce = 100;
+
+
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
@@ -72,13 +78,20 @@ public class Boid : MonoBehaviour
     {
         force = Vector3.zero;
 
+        if (playerSteeringEnabled)
+        {
+            force += PlayerSteering();
+        }
+
         // Weighted prioritised truncated running sum
         // 1. Behaviours are weighted
         // 2. Behaviours are prioritised
         // 3. Truncated
         // 4. Running sum
 
-        foreach(SteeringBehaviour b in behaviours)
+
+
+        foreach (SteeringBehaviour b in behaviours)
         {
             if (b.isActiveAndEnabled)
             {
@@ -98,7 +111,29 @@ public class Boid : MonoBehaviour
     }
 
 
-    // Update is called once per frame
+    //Funtion to add player inputs to force
+    public Vector3 PlayerSteering()
+    {
+        Vector3 force = Vector3.zero;
+        force += Input.GetAxis("Vertical") * transform.forward * steeringForce;
+
+        Vector3 projected = transform.right;
+        projected.y = 0;
+        projected.Normalize();
+
+        force += Input.GetAxis("Horizontal") * projected * steeringForce;
+
+        // Put your code here!
+        return force;
+    }
+
+
+    //Set Steering to false or true
+    public void setSteering(bool state)
+    {
+        playerSteeringEnabled = state;
+    }
+
     void Update()
     {
         force = Calculate();
